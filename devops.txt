@@ -1,0 +1,237 @@
+
+sh-3.2# cd Downloads
+
+sh-3.2# chmod 400 new.cer
+
+sh-3.2# ssh -i "new.cer" ubuntu@ec2-65-0-30-219.ap-south-1.compute.amazonaws.com 
+
+The authenticity of host 'ec2-65-0-30-219.ap-south-1.compute.amazonaws.com (65.0.30.219)' can't be established.
+ED25519 key fingerprint is SHA256:OWGQnHsZSfd+fRZNxgbB0oXNu6Tuky5wYJlZKVfKz4M.
+This key is not known by any other names
+Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+Warning: Permanently added 'ec2-65-0-30-219.ap-south-1.compute.amazonaws.com' (ED25519) to the list of known hosts.
+Welcome to Ubuntu 22.04.1 LTS (GNU/Linux 5.15.0-1019-aws x86_64)
+
+To run a command as administrator (user "root"), use "sudo <command>".
+See "man sudo_root" for details.
+
+
+ubuntu@ip-172-31-46-222:~$ sudo su
+root@ip-172-31-46-222:/home/ubuntu# apt update
+Hit:1 http://ap-south-1.ec2.archive.ubuntu.com/ubuntu jammy InRelease
+Get:2 http://ap-south-1.ec2.archive.ubuntu.com/ubuntu jammy-updates InRelease [114 kB]
+Get:3 http://security.ubuntu.com/ubuntu jammy-security InRelease [110 kB]      
+Get:4 http://ap-south-1.ec2.archive.ubuntu.com/ubuntu jammy-backports InRelease [99.8 kB]
+Get:5 http://ap-south-1.ec2.archive.ubuntu.com/ubuntu jammy/universe amd64 Packages [14.1 MB]
+
+Fetched 24.6 MB in 5s (4920 kB/s)                         
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+73 packages can be upgraded. Run 'apt list --upgradable' to see them.
+
+root@ip-172-31-46-222:/home/ubuntu# apt install docker.io
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following additional packages will be installed:
+  bridge-utils containerd dns-root-data dnsmasq-base pigz runc ubuntu-fan
+Suggested packages:
+  ifupdown aufs-tools cgroupfs-mount | cgroup-lite debootstrap docker-doc
+  rinse zfs-fuse | zfsutils
+The following NEW packages will be installed:
+  bridge-utils containerd dns-root-data dnsmasq-base docker.io pigz runc
+  ubuntu-fan
+0 upgraded, 8 newly installed, 0 to remove and 73 not upgraded.
+Need to get 65.6 MB of archives.
+After this operation, 283 MB of additional disk space will be used.
+Do you want to continue? [Y/n] y
+Get:1 http://ap-south-1.ec2.archive.ubuntu.com/ubuntu jammy/universe amd64 pigz amd64 2.6-1 [63.6 kB]
+Get:2 http://ap-south-1.ec2.archive.ubuntu.com/ubuntu jammy/main amd64 bridge-utils amd64 1.7-1ubuntu3 [34.4 kB]
+
+
+No user sessions are running outdated binaries.
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+
+
+root@ip-172-31-46-222:/home/ubuntu# docker pull jenkins:2.60.3
+2.60.3: Pulling from library/jenkins
+55cbf04beb70: Pull complete 
+1607093a898c: Pull complete 
+9a8ea045c926: Pull complete 
+d4eee24d4dac: Pull complete 
+c58988e753d7: Pull complete 
+
+Digest: sha256:eeb4850eb65f2d92500e421b430ed1ec58a7ac909e91f518926e02473904f668
+Status: Downloaded newer image for jenkins:2.60.3
+docker.io/library/jenkins:2.60.3
+root@ip-172-31-46-222:/home/ubuntu# docker run -p 8080:8080 -d jenkins:2.60.3
+15b109a9e5657e9cd00b738688b1c16bac586f16abae6f63ac53e776731b4026
+
+root@ip-172-31-46-222:/home/ubuntu# docker ps
+
+CONTAINER ID   IMAGE            COMMAND                  CREATED          STATUS         PORTS                                                  NAMES
+15b109a9e565   jenkins:2.60.3   "/bin/tini -- /usr/l…"   10 seconds ago   Up 9 seconds   0.0.0.0:8080->8080/tcp, :::8080->8080/tcp, 50000/tcp   charming_lalande
+
+root@ip-172-31-46-222:/home/ubuntu# docker exec -it 15b109a9e565 "/bin/sh"
+$ ls
+bin   dev		etc   lib    media  opt   root	sbin  sys  usr
+boot  docker-java-home	home  lib64  mnt    proc  run	srv   tmp  var
+$ cd var
+$ ls
+backups  cache	jenkins_home  lib  local  lock	log  mail  opt	run  spool  tmp
+$ cd /var/jenkins_home/secrets/
+$ ls
+filepath-filters.d
+hudson.console.ConsoleNote.MAC
+hudson.util.Secret
+initialAdminPassword
+jenkins.model.Jenkins.crumbSalt
+jenkins.security.ApiTokenProperty.seed
+master.key
+org.jenkinsci.main.modules.instance_identity.InstanceIdentity.KEY
+slave-to-master-security-kill-switch
+whitelisted-callables.d
+$ cat initialAdminPassword
+9ff7cdbc38444a86b1fb049a131b1652
+$ exit
+
+root@ip-172-31-46-222:/home/ubuntu# docker ps
+
+CONTAINER ID   IMAGE            COMMAND                  CREATED          STATUS          PORTS                                                  NAMES
+15b109a9e565   jenkins:2.60.3   "/bin/tini -- /usr/l…"   11 minutes ago   Up 11 minutes   0.0.0.0:8080->8080/tcp, :::8080->8080/tcp, 50000/tcp   charming_lalande
+
+root@ip-172-31-46-222:/home/ubuntu# docker stop 15b109a9e565
+15b109a9e565
+root@ip-172-31-46-222:/home/ubuntu# docker start 15b109a9e565
+15b109a9e565
+root@ip-172-31-46-222:/home/ubuntu# docker stop 15b109a9e565
+15b109a9e565
+root@ip-172-31-46-222:/home/ubuntu# docker rm 15b109a9e565
+15b109a9e565
+root@ip-172-31-46-222:/home/ubuntu# docker ps
+CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+
+
+root@ip-172-31-46-222:/home/ubuntu# docker run -p 8080:8080 jenkins:2.60.3
+Running from: /usr/share/jenkins/jenkins.war
+webroot: EnvVars.masterEnvVars.get("JENKINS_HOME")
+Oct 31, 2022 2:56:28 AM Main deleteWinstoneTempContents
+WARNING: Failed to delete the temporary Winstone file /tmp/winstone/jenkins.war
+Oct 31, 2022 2:56:28 AM org.eclipse.jetty.util.log.JavaUtilLog info
+
+Oct 31, 2022 2:56:30 AM org.eclipse.jetty.util.log.JavaUtilLog info
+INFO: jetty-9.2.z-SNAPSHOTeans.factory.support.DefaultListableBeanFactory@31fd27fa: defining beans [authenticationManager]; root of factory hierarchy
+Oct 31, 2022 2:56:40 AM org.springframework.context.support.AbstractApplicationContext prepareRefresh
+INFO: Refreshing org.springframework.web.context.support.StaticWebApplicationContext@6e8101ac: display name [Root WebApplicationContext]; startup date [Mon Oct 31 02:56:40 UTC 2022]; root of context hierarchy
+Oct 31, 2022 2:56:40 AM org.springframework.context.support.AbstractApplicationContext obtainFreshBeanFactory
+INFO: Bean factory for application context [org.springframework.web.context.support.StaticWebApplicationContext@6e8101ac]: org.springframework.beans.factory.support.DefaultListableBeanFactory@32bf5ede
+
+*************************************************************
+
+Jenkins initial setup is required. An admin user has been created and a password generated.
+Please use the following password to proceed to installation:
+
+b7b8300bf0044df493943eae93a3979c
+
+This may also be found at: /var/jenkins_home/secrets/initialAdminPassword
+
+*************************************************************
+re.verify(Signature.java:655)<br>	at hudson.PluginManager.doCheckUpdatesServer(PluginManager.java:1632)<br>	at jenkins.model.DownloadSettings$DailyCheck.execute(DownloadSettings.java:131)<br>	at hudson.model.AsyncPeriodicWork$1.run(AsyncPeriodicWork.java:101)<br>	at java.lang.Thread.run(Thread.java:748)<br></pre>
+Oct 31, 2022 2:56:59 AM hudson.model.AsyncPeriodicWork$1 run
+INFO: Finished Download metadata. 21,062 ms
+Oct 31, 2022 2:57:03 AM hudson.model.UpdateSite updateData
+SEVERE: ERROR: Signature verification failed in update site &#039;default&#039; <a href='#' class='showDetails'>(show details)</a><pre style='display:none'>java.security.SignatureException: Signature length not correct: got 512 but was expecting 256<br>	at sun.security.rsa.RSASignature.engineVerify(RSASignature.java:189)<br>	at java.security.Signature$Delegate.engineVerify(Signature.java:1222)<br>	
+
+root@ip-172-31-46-222:/home/ubuntu# docker volume inspect my-vol
+[
+    {
+        "CreatedAt": "2022-10-31T03:00:43Z",
+        "Driver": "local",
+        "Labels": {},
+        "Mountpoint": "/var/lib/docker/volumes/my-vol/_data",
+        "Name": "my-vol",
+        "Options": {},
+        "Scope": "local"
+    }
+]
+root@ip-172-31-46-222:/home/ubuntu# cd /var/lib/docker/volumes/my-vol/_data
+
+root@ip-172-31-46-222:/var/lib/docker/volumes/my-vol/_data# cd -
+/home/ubuntu
+root@ip-172-31-46-222:/home/ubuntu# docker run -p 8080:8080 -v my-vol:/var/jenkins_home jenkins:2.60.3
+Running from: /usr/share/jenkins/jenkins.war
+webroot: EnvVars.masterEnvVars.get("JENKINS_HOME")
+Oct 31, 2022 3:08:16 AM Main deleteWinstoneTempContents
+WARNING: Failed to delete the temporary Winstone file /tmp/winstone/jenkins.war
+Oct 31, 2022 3:08:16 AM org.eclipse.jetty.util.log.JavaUtilLog info
+
+Oct 31, 2022 3:08:22 AM jenkins.InitReactorRunner$1 onAttained
+
+*************************************************************
+*************************************************************
+
+Jenkins initial setup is required. An admin user has been created and a password generated.
+Please use the following password to proceed to installation:
+
+8c1bc296771a4c469e3ac3ca5daae21a
+
+This may also be found at: /var/jenkins_home/secrets/initialAdminPassword
+
+*************************************************************
+*************************************************************
+*************************************************************
+
+--> setting agent port for jnlp
+--> setting agent port for jnlp... done
+Oct 31, 2022 3:08:49 AM hudson.model.UpdateSite updateData
+SEVERE: ERROR: Signature verification failed in update site &#039;default&#039; <a href='#' class='showDetails'>(show details)</a><pre style='display:none'>java.security.SignatureException: Signature length not correct: got 512 but was expecting 256<br>	at sun.security.rsa.RSASignature.engineVerify(RSASignature.java:189)<br>	at java.security.Signature$Delegate.engineVerify(Signature.java:1222)<br>va:748)<br></pre>
+25)<br>Caused: java.security.cert.CertPathValidatorException: signature check failed<br>	at sun.security.provider.certpath.PKIXMasterCertPathValidator.validate(PKIXMasterCertPathValidator.java:135)<br>	at sun.security.provider.certpath.PKIXCertPathValidator.validate(PKIXCertPathValidator.java:233)<br>	at sun.security.provider.certpath.PKIXCertPathValidator.validate(PKIXCertPathValidator.java:141)<br>	at sun.security.provider.certpath.PKIXCertPathValidator.engineValidate(PKIXCertPathValidator.java:80)<br>	at java.security.cert.CertPathValidator.validate(CertPathValidator.java:292)<br>at org.jvnet.hudson.crypto.CertificateUtil.validatePath(CertificateUtil.java:93)<br>	
+^COct 31, 2022 3:11:05 AM winstone.Logger logInternal
+INFO: JVM is terminating. Shutting down Winstone
+
+root@ip-172-31-46-222:/home/ubuntu# docker ps
+CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+
+root@ip-172-31-46-222:/home/ubuntu# docker ps -a
+CONTAINER ID   IMAGE            COMMAND                  CREATED          STATUS                        PORTS     NAMES
+9c146324f10e   jenkins:2.60.3   "/bin/tini -- /usr/l…"   3 minutes ago    Exited (130) 18 seconds ago             eloquent_cohen
+30806c1353e8   jenkins:2.60.3   "/bin/tini -- /usr/l…"   14 minutes ago   Exited (130) 10 minutes ago             elegant_pasteur
+
+root@ip-172-31-46-222:/home/ubuntu# docker rm 9c146324f10e 
+9c146324f10e
+root@ip-172-31-46-222:/home/ubuntu# docker images
+REPOSITORY   TAG       IMAGE ID       CREATED       SIZE
+jenkins      2.60.3    cd14cecfdb3a   4 years ago   696MB
+
+
+root@ip-172-31-46-222:/home/ubuntu# docker rmi -f  jenkins:2.60.3
+Untagged: jenkins:2.60.3
+Untagged: jenkins@sha256:eeb4850eb65f2d92500e421b430ed1ec58a7ac909e91f518926e02473904f668
+Deleted: sha256:cd14cecfdb3a657ba7d05bea026e7ac8b9abafc6e5c66253ab327c7211fa6281
+
+root@ip-172-31-46-222:/home/ubuntu# docker images
+REPOSITORY   TAG       IMAGE ID   CREATED   SIZE
+
+root@ip-172-31-46-222:/home/ubuntu# docker run -p 8080:8080 -v my-vol:/var/jenkins_home jenkins:2.60.3
+Unable to find image 'jenkins:2.60.3' locally
+2.60.3: Pulling from library/jenkins
+55cbf04beb70: Already exists 
+1607093a898c: Already exists 
+9a8ea045c926: Already exists 
+d4eee24d4dac: Already exists 
+c58988e753d7: Already exists 
+21b430ed1ec58a7ac909e91f518926e02473904f668
+Status: Downloaded newer image for jenkins:2.60.3
+Running from: /usr/share/jenkins/jenkins.war
+webroot: EnvVars.masterEnvVars.get("JENKINS_HOME")
+Oct 31, 2022 3:15:46 AM Main deleteWinstoneTempContents
+WARNING: Failed to delete the temporary Winstone file /tmp/winstone/jenkins.war
+Oct 31, 2022 3:15:46 AM org.eclipse.jetty.util.log.JavaUtilLog info
+
+	at hudson.model.UpdateSite.updateDirectlyNow(UpdateSite.java:190)<br>	at hudson.PluginManager.doCheckUpdatesServer(PluginManager.java:1632)<br>	at jenkins.model.DownloadSettings$DailyCheck.execute(DownloadSettings.java:131)<br>	at hudson.model.AsyncPeriodicWork$1.run(AsyncPeriodicWork.java:101)<br>	at java.lang.Thread.run(Thread.java:748)<br></pre>
+Oct 31, 2022 3:16:04 AM hudson.model.AsyncPeriodicWork$1 run
+INFO: Finished Download metadata. 10,885 ms
+client_loop: send disconnect: Broken pipe
+sh-3.2# 
